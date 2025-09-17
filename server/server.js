@@ -1,11 +1,12 @@
 // JavaScript entry point for YouthWell AI Backend
-require('dotenv').config();
+import dotenv from 'dotenv';
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import { Pool } from '@neondatabase/serverless';
 
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const { Pool } = require('@neondatabase/serverless');
+dotenv.config();
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
