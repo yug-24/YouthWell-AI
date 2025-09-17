@@ -36,3 +36,6 @@ externalPort = 80
 [[ports]]
 localPort = 44245
 externalPort = 3000
+
+[agent]
+integrations = ["javascript_database:1.0.0"]
