@@ -25,7 +25,7 @@ async function startServer() {
     await ensureDatabase();
     
     // Start server
-    app.listen(PORT, '0.0.0.0', () => {
+    app.listen(PORT, 'localhost', () => {
       console.log(`🚀 YouthWell AI Backend Server running on port ${PORT}`);
       console.log(`📊 Health check: http://localhost:${PORT}/health`);
       console.log(`🔗 API endpoints: http://localhost:${PORT}/api`);
