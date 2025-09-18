@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Wind, Heart, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, Image, Music, Sparkles } from 'lucide-react';
+import AudioPlayer from '../components/AudioPlayer';
+import morningCalmImage from '@assets/generated_images/Indian_meditation_morning_calm_46a7515d.png';
+import anxietyReliefImage from '@assets/generated_images/Indian_anxiety_relief_meditation_5da3d691.png';
+import bodyScanImage from '@assets/generated_images/Indian_body_scan_relaxation_27242aeb.png';
+import omChantingImage from '@assets/generated_images/Sacred_Om_chanting_meditation_7bbcd4c0.png';
+import interstellarImage from '@assets/generated_images/Interstellar_cosmic_meditation_9168f41d.png';
 
 const Tools: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'breathing' | 'meditation' | 'sleep' | 'cultural'>('breathing');
-  const [meditationSubTab, setMeditationSubTab] = useState<'general' | 'om' | 'visualization'>('general');
+  const [meditationSubTab, setMeditationSubTab] = useState<'general' | 'om' | 'visualization' | 'interstellar'>('general');
   const [breathingPhase, setBreathingPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
   const [breathingActive, setBreathingActive] = useState(false);
   const [breathingCount, setBreathingCount] = useState(0);
   const [currentAudio, setCurrentAudio] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
 
   // Breathing Exercise Logic
   useEffect(() => {
@@ -48,49 +53,55 @@ const Tools: React.FC = () => {
 
   const meditations = [
     {
-      id: '1',
+      id: 'morning-calm',
       title: '5-Minute Morning Calm',
       duration: '5:00',
       description: 'Start your day with gentle mindfulness',
-      color: 'from-blue-400 to-blue-600'
+      color: 'from-blue-400 to-blue-600',
+      audioFile: '5 Minute Peaceful Morning Meditation Music_1758182528871.mp3',
+      image: morningCalmImage
     },
     {
-      id: '2',
+      id: 'anxiety-relief',
       title: 'Anxiety Relief',
-      duration: '10:00',
+      duration: '5:00',
       description: 'Techniques to ease worried thoughts',
-      color: 'from-emerald-400 to-emerald-600'
+      color: 'from-emerald-400 to-emerald-600',
+      audioFile: '5 Minute Stress Relief Guided Meditation_1758182528872.mp3',
+      image: anxietyReliefImage
     },
     {
-      id: '3',
+      id: 'body-scan',
       title: 'Body Scan Relaxation',
-      duration: '15:00',
+      duration: '5:00',
       description: 'Release tension throughout your body',
-      color: 'from-purple-400 to-purple-600'
+      color: 'from-purple-400 to-purple-600',
+      audioFile: 'Relax Your Body & Your Mind ~ 5 Minute Guided Meditation_1758182528870.mp3',
+      image: bodyScanImage
     }
   ];
   
   const omChantings = [
     {
-      id: 'om1',
-      title: 'Basic OM Meditation',
+      id: 'om-chanting',
+      title: 'OM Meditation - 432Hz',
       duration: '5:00',
-      description: 'Simple guided OM chanting for beginners',
-      color: 'from-indigo-400 to-indigo-600'
-    },
+      description: 'Sacred OM chanting at 432Hz frequency for deep relaxation',
+      color: 'from-indigo-400 to-indigo-600',
+      audioFile: 'Om Chanting for 5 Mins@432Hz,Relax Mind & Body, Connects your soul with universe! #omchanting #om_1758182528868.mp3',
+      image: omChantingImage
+    }
+  ];
+  
+  const interstellarMeditations = [
     {
-      id: 'om2',
-      title: 'Deep OM Practice',
-      duration: '10:00',
-      description: 'Extended session with breathing techniques',
-      color: 'from-purple-400 to-purple-600'
-    },
-    {
-      id: 'om3',
-      title: 'OM Sound Bath',
-      duration: '15:00',
-      description: 'Immersive experience with multiple OM frequencies',
-      color: 'from-blue-400 to-blue-600'
+      id: 'interstellar-calm',
+      title: 'Interstellar Calm – 5 Minutes',
+      duration: '5:00',
+      description: 'Cosmic meditation journey through space and time',
+      color: 'from-purple-600 to-blue-800',
+      audioFile: 'Interstellar Main Theme - Hans Zimmer_1758182528872.mp3',
+      image: interstellarImage
     }
   ];
   
@@ -153,25 +164,28 @@ const Tools: React.FC = () => {
 
   const sleepSounds = [
     {
-      id: '1',
+      id: 'ocean-waves',
       title: 'Ocean Waves',
-      duration: '30:00',
+      duration: '5:00',
       description: 'Gentle waves for peaceful sleep',
-      color: 'from-teal-400 to-teal-600'
+      color: 'from-teal-400 to-teal-600',
+      audioFile: 'Relax _ 5 minutes of Sand and Sea _ Sounds of Nature _ Sleep Sounds_1758182528869.mp3'
     },
     {
-      id: '2',
+      id: 'forest-rain',
       title: 'Forest Rain',
-      duration: '45:00',
+      duration: '5:00',
       description: 'Soothing raindrops in nature',
-      color: 'from-green-400 to-green-600'
+      color: 'from-green-400 to-green-600',
+      audioFile: 'JUST 5 MINUTES Rain Forest Thunder & Rain Sleep Sounds Forest Sounds  Ambience Bird  BE WITH NATURE❤_1758182528863.mp3'
     },
     {
-      id: '3',
+      id: 'bedtime-affirmations',
       title: 'Bedtime Affirmations',
-      duration: '10:00',
+      duration: '5:00',
       description: 'Positive thoughts for restful sleep',
-      color: 'from-indigo-400 to-indigo-600'
+      color: 'from-indigo-400 to-indigo-600',
+      audioFile: 'Bedtime Affirmations _ Listen Every Night for Peaceful Sleep 🌙_1758182528872.mp3'
     }
   ];
   
@@ -265,12 +279,7 @@ const Tools: React.FC = () => {
   ];
 
   const handleAudioToggle = (audioId: string) => {
-    if (currentAudio === audioId && isPlaying) {
-      setIsPlaying(false);
-    } else {
-      setCurrentAudio(audioId);
-      setIsPlaying(true);
-    }
+    setCurrentAudio(audioId);
   };
 
   return (
@@ -400,7 +409,7 @@ const Tools: React.FC = () => {
                       : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                   }`}
                 >
-                  General
+                  Meditations
                 </button>
                 <button
                   onClick={() => setMeditationSubTab('om')}
@@ -411,6 +420,16 @@ const Tools: React.FC = () => {
                   }`}
                 >
                   OM Chanting
+                </button>
+                <button
+                  onClick={() => setMeditationSubTab('interstellar')}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    meditationSubTab === 'interstellar'
+                      ? 'border-purple-500 text-purple-600 dark:text-purple-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                >
+                  General Meditation
                 </button>
                 <button
                   onClick={() => setMeditationSubTab('visualization')}
@@ -426,226 +445,192 @@ const Tools: React.FC = () => {
 
               {/* General Meditations */}
               {meditationSubTab === 'general' && (
-                <div className="grid gap-4">
-                  {meditations.map((meditation) => (
-                    <div key={meditation.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                      <div className="flex items-center space-x-4">
-                        <div className={`w-16 h-16 rounded-lg bg-gradient-to-r ${meditation.color} flex items-center justify-center`}>
-                          {currentAudio === meditation.id && isPlaying ? (
-                            <Pause className="h-6 w-6 text-white" />
-                          ) : (
-                            <Play className="h-6 w-6 text-white" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                            {meditation.title}
-                          </h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                            {meditation.description}
-                          </p>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                              {meditation.duration}
-                            </span>
-                            <div className="flex items-center space-x-2">
-                              <button
-                                onClick={() => handleAudioToggle(meditation.id)}
-                                className="p-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
-                              >
-                                {currentAudio === meditation.id && isPlaying ? (
-                                  <Pause className="h-4 w-4" />
-                                ) : (
-                                  <Play className="h-4 w-4" />
-                                )}
-                              </button>
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                      Guided Meditations
+                    </h3>
+                    <div className="grid gap-6">
+                      {meditations.map((meditation) => (
+                        <div key={meditation.id} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                          <div className="flex items-center space-x-4 p-4">
+                            <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                              <img 
+                                src={meditation.image} 
+                                alt={meditation.title}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                                {meditation.title}
+                              </h4>
+                              <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                                {meditation.description}
+                              </p>
+                              <AudioPlayer
+                                audioSrc={`/uploads/${encodeURIComponent(meditation.audioFile)}`}
+                                title={meditation.title}
+                                duration={meditation.duration}
+                                isActive={currentAudio === meditation.id}
+                                onToggle={() => handleAudioToggle(meditation.id)}
+                                className="mb-2"
+                              />
                             </div>
                           </div>
                         </div>
-                      </div>
-                      
-                      {currentAudio === meditation.id && (
-                        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
-                            <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 h-2 rounded-full" style={{ width: '25%' }}></div>
-                          </div>
-                          <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
-                            <span>1:15</span>
-                            <span>{meditation.duration}</span>
-                          </div>
-                        </div>
-                      )}
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
               )}
               
               {/* OM Chanting */}
               {meditationSubTab === 'om' && (
-                <div>
-                  <div className="mb-6">
+                <div className="space-y-6">
+                  <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                       OM Chanting Meditation
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-300">
+                    <p className="text-gray-600 dark:text-gray-300 mb-6">
                       Experience the sacred sound of OM (ॐ), known as the primordial sound of the universe. 
-                      These guided sessions help reduce stress, improve concentration, and promote inner peace.
+                      This guided session helps reduce stress, improve concentration, and promote inner peace.
                     </p>
                   </div>
                   
-                  <div className="grid gap-4">
+                  <div className="grid gap-6">
                     {omChantings.map((meditation) => (
-                      <div key={meditation.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                        <div className="flex items-center space-x-4">
-                          <div className={`w-16 h-16 rounded-lg bg-gradient-to-r ${meditation.color} flex items-center justify-center`}>
-                            {currentAudio === meditation.id && isPlaying ? (
-                              <Pause className="h-6 w-6 text-white" />
-                            ) : (
-                              <Play className="h-6 w-6 text-white" />
-                            )}
+                      <div key={meditation.id} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                        <div className="flex items-center space-x-4 p-4">
+                          <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                            <img 
+                              src={meditation.image} 
+                              alt={meditation.title}
+                              className="w-full h-full object-cover"
+                            />
                           </div>
                           <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                            <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
                               {meditation.title}
-                            </h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                            </h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
                               {meditation.description}
                             </p>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                {meditation.duration}
-                              </span>
-                              <div className="flex items-center space-x-2">
-                                <button
-                                  onClick={() => handleAudioToggle(meditation.id)}
-                                  className="p-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
-                                >
-                                  {currentAudio === meditation.id && isPlaying ? (
-                                    <Pause className="h-4 w-4" />
-                                  ) : (
-                                    <Play className="h-4 w-4" />
-                                  )}
-                                </button>
-                              </div>
-                            </div>
+                            <AudioPlayer
+                              audioSrc={`/uploads/${encodeURIComponent(meditation.audioFile)}`}
+                              title={meditation.title}
+                              duration={meditation.duration}
+                              isActive={currentAudio === meditation.id}
+                              onToggle={() => handleAudioToggle(meditation.id)}
+                              className="mb-2"
+                            />
                           </div>
                         </div>
-                        
-                        {currentAudio === meditation.id && (
-                          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center space-x-4">
-                                <button className="p-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
-                                  <SkipBack className="h-4 w-4" />
-                                </button>
-                                <button
-                                  onClick={() => handleAudioToggle(meditation.id)}
-                                  className="p-3 bg-indigo-100 dark:bg-indigo-900/50 hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-full transition-colors"
-                                >
-                                  {currentAudio === meditation.id && isPlaying ? (
-                                    <Pause className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                                  ) : (
-                                    <Play className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                                  )}
-                                </button>
-                                <button className="p-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
-                                  <SkipForward className="h-4 w-4" />
-                                </button>
-                              </div>
-                              <div>
-                                <button className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
-                                  Repeat
-                                </button>
-                              </div>
-                            </div>
-                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
-                              <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 h-2 rounded-full" style={{ width: '35%' }}></div>
-                            </div>
-                            <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
-                              <span>1:45</span>
-                              <span>{meditation.duration}</span>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-              
-              {/* Visualization Meditations */}
-              {meditationSubTab === 'visualization' && (
-                <div>
-                  <div className="mb-6">
+
+              {/* Interstellar Meditation */}
+              {meditationSubTab === 'interstellar' && (
+                <div className="space-y-6">
+                  <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      Indian Visualization Meditations
+                      General Meditation - Interstellar
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      Experience guided meditations that transport you to beautiful locations across India. 
-                      Each session combines visual imagery with mindfulness techniques for a deeply immersive experience.
+                    <p className="text-gray-600 dark:text-gray-300 mb-6">
+                      Journey through cosmic spaces with ethereal meditation music that transcends earthly boundaries.
                     </p>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {visualizations.map((item) => (
-                      <div key={item.id} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                        <div className="relative h-48 overflow-hidden">
-                          <img 
-                            src={item.image} 
-                            alt={item.title} 
-                            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-                            <div>
-                              <h3 className="text-white font-semibold mb-1">{item.title}</h3>
-                              <p className="text-white/80 text-sm">{item.location}</p>
-                            </div>
+                  <div className="grid gap-6">
+                    {interstellarMeditations.map((meditation) => (
+                      <div key={meditation.id} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                        <div className="flex items-center space-x-4 p-4">
+                          <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                            <img 
+                              src={meditation.image} 
+                              alt={meditation.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                              {meditation.title}
+                            </h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                              {meditation.description}
+                            </p>
+                            <AudioPlayer
+                              audioSrc={`/uploads/${encodeURIComponent(meditation.audioFile)}`}
+                              title={meditation.title}
+                              duration={meditation.duration}
+                              isActive={currentAudio === meditation.id}
+                              onToggle={() => handleAudioToggle(meditation.id)}
+                              className="mb-2"
+                            />
                           </div>
                         </div>
-                        <div className="p-4">
-                          <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
-                            {item.description}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Visualization */}
+              {meditationSubTab === 'visualization' && (
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                      Indian Cultural Visualizations
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-300 mb-6">
+                      Immerse yourself in the serene landscapes and sacred places of India through guided visualization.
+                    </p>
+                  </div>
+                  
+                  <div className="grid gap-6 md:grid-cols-2">
+                    {visualizations.map((visualization) => (
+                      <div key={visualization.id} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+                        <div className="aspect-video relative overflow-hidden">
+                          <img 
+                            src={visualization.image} 
+                            alt={visualization.title}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          />
+                          <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => handleAudioToggle(visualization.id)}
+                              className="p-4 bg-white bg-opacity-90 rounded-full hover:bg-opacity-100 transition-all"
+                            >
+                              <Play className="h-8 w-8 text-gray-800 ml-1" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="p-6">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                              {visualization.title}
+                            </h3>
+                            <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                              {visualization.location}
+                            </span>
+                          </div>
+                          <p className="text-gray-600 dark:text-gray-300 mb-4">
+                            {visualization.description}
                           </p>
                           <div className="flex items-center justify-between">
                             <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                              {item.duration}
+                              {visualization.duration}
                             </span>
                             <button
-                              onClick={() => handleAudioToggle(item.id)}
-                              className={`px-4 py-2 rounded-lg transition-colors ${currentAudio === item.id && isPlaying ? 
-                                'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 
-                                'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'}`}
+                              onClick={() => handleAudioToggle(visualization.id)}
+                              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                             >
-                              <div className="flex items-center space-x-2">
-                                {currentAudio === item.id && isPlaying ? (
-                                  <>
-                                    <Pause className="h-4 w-4" />
-                                    <span>Pause</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Play className="h-4 w-4" />
-                                    <span>Play</span>
-                                  </>
-                                )}
-                              </div>
+                              Start Session
                             </button>
                           </div>
-                          
-                          {currentAudio === item.id && (
-                            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
-                                <div className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full" style={{ width: '15%' }}></div>
-                              </div>
-                              <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
-                                <span>1:30</span>
-                                <span>{item.duration}</span>
-                              </div>
-                              <button className="mt-2 w-full py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors text-sm font-medium">
-                                Enter Full Screen
-                              </button>
-                            </div>
-                          )}
                         </div>
                       </div>
                     ))}
@@ -657,121 +642,91 @@ const Tools: React.FC = () => {
 
           {/* Sleep Aids */}
           {activeTab === 'sleep' && (
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                Sleep Aids & Affirmations
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Relax your mind and prepare for restful sleep
-              </p>
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                  Sleep Aids
+                </h2>
+                <p className="text-gray-600 dark:text-gray-300 mb-6">
+                  Soothing sounds and affirmations to help you drift into peaceful sleep
+                </p>
+              </div>
 
-              <div className="grid gap-4">
+              <div className="grid gap-6">
                 {sleepSounds.map((sound) => (
-                  <div key={sound.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-16 h-16 rounded-lg bg-gradient-to-r ${sound.color} flex items-center justify-center`}>
-                        {currentAudio === sound.id && isPlaying ? (
-                          <VolumeX className="h-6 w-6 text-white" />
-                        ) : (
-                          <Volume2 className="h-6 w-6 text-white" />
-                        )}
+                  <div key={sound.id} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                    <div className="flex items-center space-x-4 p-4">
+                      <div className={`w-20 h-20 rounded-lg bg-gradient-to-r ${sound.color} flex items-center justify-center flex-shrink-0`}>
+                        <Volume2 className="h-8 w-8 text-white" />
                       </div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
                           {sound.title}
                         </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
                           {sound.description}
                         </p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                            {sound.duration}
-                          </span>
-                          <div className="flex items-center space-x-2">
-                            <button className="p-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
-                              <SkipBack className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => handleAudioToggle(sound.id)}
-                              className="p-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
-                            >
-                              {currentAudio === sound.id && isPlaying ? (
-                                <Pause className="h-4 w-4" />
-                              ) : (
-                                <Play className="h-4 w-4" />
-                              )}
-                            </button>
-                            <button className="p-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
-                              <SkipForward className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </div>
+                        <AudioPlayer
+                          audioSrc={`/uploads/${encodeURIComponent(sound.audioFile)}`}
+                          title={sound.title}
+                          duration={sound.duration}
+                          isActive={currentAudio === sound.id}
+                          onToggle={() => handleAudioToggle(sound.id)}
+                          className="mb-2"
+                        />
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-
-              <div className="mt-8 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
-                  Tonight's Affirmation
-                </h3>
-                <blockquote className="text-lg italic text-gray-700 dark:text-gray-300">
-                  "I release the day's worries and embrace peaceful rest. My mind is calm, 
-                  my body is relaxed, and I am ready for healing sleep."
-                </blockquote>
-              </div>
             </div>
           )}
-          
+
           {/* Cultural Activities */}
           {activeTab === 'cultural' && (
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                Indian Cultural Activities
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Explore traditional Indian practices for mental wellness and mindfulness
-              </p>
-              
-              {/* Yoga Section */}
-              <div className="mb-10">
-                <div className="flex items-center mb-4">
-                  <Sparkles className="h-5 w-5 text-purple-600 dark:text-purple-400 mr-2" />
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    Yoga Poses
-                  </h3>
-                </div>
+            <div className="space-y-8">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                  Indian Cultural Wellness Activities
+                </h2>
                 <p className="text-gray-600 dark:text-gray-300 mb-6">
-                  Practice these traditional yoga poses to improve physical and mental wellbeing
+                  Explore traditional Indian practices for mental wellness and spiritual growth
                 </p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              </div>
+
+              {/* Yoga Section */}
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  Traditional Yoga Poses
+                </h3>
+                <div className="grid gap-6 md:grid-cols-2">
                   {yogaPoses.map((pose) => (
-                    <div key={pose.id} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                      <div className="relative h-48 overflow-hidden">
+                    <div key={pose.id} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+                      <div className="aspect-video relative overflow-hidden">
                         <img 
                           src={pose.image} 
-                          alt={pose.title} 
-                          className="w-full h-full object-cover"
+                          alt={pose.title}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                         />
-                        <div className="absolute top-2 right-2 bg-white dark:bg-gray-800 text-xs font-medium px-2 py-1 rounded-full">
-                          {pose.difficulty}
+                        <div className="absolute top-4 right-4">
+                          <span className="bg-white bg-opacity-90 text-gray-800 px-2 py-1 rounded-full text-xs font-medium">
+                            {pose.difficulty}
+                          </span>
                         </div>
                       </div>
-                      <div className="p-4">
-                        <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                      <div className="p-6">
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                           {pose.title}
                         </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                        <p className="text-gray-600 dark:text-gray-300 mb-4">
                           {pose.description}
                         </p>
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                            {pose.duration} hold
+                            {pose.duration}
                           </span>
-                          <button className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg text-sm font-medium">
-                            Start Timer
+                          <button className="px-4 py-2 bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 rounded-lg text-sm font-medium hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors">
+                            Try Pose
                           </button>
                         </div>
                       </div>
@@ -779,133 +734,78 @@ const Tools: React.FC = () => {
                   ))}
                 </div>
               </div>
-              
-              {/* Mantra Chanting Section */}
-              <div className="mb-10">
-                <div className="flex items-center mb-4">
-                  <Music className="h-5 w-5 text-amber-600 dark:text-amber-400 mr-2" />
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    Mantra Chanting
-                  </h3>
-                </div>
-                <p className="text-gray-600 dark:text-gray-300 mb-6">
-                  Experience the healing power of traditional Sanskrit mantras
-                </p>
-                
-                <div className="grid gap-4">
+
+              {/* Mantras Section */}
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  Sacred Mantras
+                </h3>
+                <div className="grid gap-6">
                   {mantras.map((mantra) => (
-                    <div key={mantra.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                      <div className="flex items-center space-x-4">
-                        <div className={`w-16 h-16 rounded-lg bg-gradient-to-r ${mantra.color} flex items-center justify-center`}>
-                          {currentAudio === mantra.id && isPlaying ? (
-                            <Pause className="h-6 w-6 text-white" />
-                          ) : (
-                            <Play className="h-6 w-6 text-white" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
-                            {mantra.title}
-                          </h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                            {mantra.description}
-                          </p>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                              {mantra.duration}
-                            </span>
-                            <div className="flex items-center space-x-2">
-                              <button
-                                onClick={() => handleAudioToggle(mantra.id)}
-                                className="p-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
-                              >
-                                {currentAudio === mantra.id && isPlaying ? (
-                                  <Pause className="h-4 w-4" />
-                                ) : (
-                                  <Play className="h-4 w-4" />
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-                        <p className="text-center font-medium text-amber-800 dark:text-amber-300">
+                    <div key={mantra.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                      <div className={`w-full h-2 bg-gradient-to-r ${mantra.color} rounded-full mb-4`}></div>
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                        {mantra.title}
+                      </h4>
+                      <p className="text-gray-600 dark:text-gray-300 mb-4">
+                        {mantra.description}
+                      </p>
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-4">
+                        <p className="text-center text-lg font-medium text-gray-900 dark:text-white leading-relaxed">
                           {mantra.text}
                         </p>
                       </div>
-                      
-                      {currentAudio === mantra.id && (
-                        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
-                            <div className="bg-gradient-to-r from-amber-500 to-amber-600 h-2 rounded-full" style={{ width: '30%' }}></div>
-                          </div>
-                          <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
-                            <span>3:00</span>
-                            <span>{mantra.duration}</span>
-                          </div>
-                        </div>
-                      )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Recommended: {mantra.duration}
+                        </span>
+                        <button className="px-4 py-2 bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300 rounded-lg text-sm font-medium hover:bg-amber-200 dark:hover:bg-amber-800 transition-colors">
+                          Start Chanting
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
-              
-              {/* Festival-Inspired Mindfulness */}
+
+              {/* Festival Meditations Section */}
               <div>
-                <div className="flex items-center mb-4">
-                  <Sparkles className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mr-2" />
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    Festival-Inspired Mindfulness
-                  </h3>
-                </div>
-                <p className="text-gray-600 dark:text-gray-300 mb-6">
-                  Mindfulness practices inspired by traditional Indian festivals
-                </p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  Festival-Inspired Meditations
+                </h3>
+                <div className="grid gap-6 md:grid-cols-3">
                   {festivals.map((festival) => (
-                    <div key={festival.id} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                      <div className="relative h-40 overflow-hidden">
+                    <div key={festival.id} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+                      <div className="aspect-video relative overflow-hidden">
                         <img 
                           src={festival.image} 
-                          alt={festival.title} 
-                          className="w-full h-full object-cover"
+                          alt={festival.title}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                         />
+                        <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                          <button className="p-4 bg-white bg-opacity-90 rounded-full hover:bg-opacity-100 transition-all">
+                            <Play className="h-8 w-8 text-gray-800 ml-1" />
+                          </button>
+                        </div>
                       </div>
-                      <div className="p-4">
-                        <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                      <div className="p-6">
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                           {festival.title}
                         </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                        <p className="text-gray-600 dark:text-gray-300 mb-4">
                           {festival.description}
                         </p>
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
                             {festival.duration}
                           </span>
-                          <button
-                            onClick={() => handleAudioToggle(festival.id)}
-                            className="px-3 py-1 bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 text-orange-600 dark:text-orange-400 rounded-lg text-sm font-medium"
-                          >
-                            Begin Practice
+                          <button className="px-4 py-2 bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                            Experience
                           </button>
                         </div>
                       </div>
                     </div>
                   ))}
-                </div>
-                
-                <div className="mt-8 p-6 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl">
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
-                    Cultural Note
-                  </h3>
-                  <p className="text-gray-700 dark:text-gray-300">
-                    Indian festivals celebrate important cultural and spiritual traditions. These mindfulness 
-                    practices are inspired by the core values of these celebrations - joy, light, renewal, and 
-                    community - and adapted to support mental wellness regardless of cultural background.
-                  </p>
                 </div>
               </div>
             </div>
