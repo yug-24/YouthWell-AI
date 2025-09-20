@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -9,6 +9,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler,
 } from 'chart.js';
 import { TrendingUp, Target, Calendar, Award, Heart } from 'lucide-react';
 
@@ -20,53 +21,173 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 
 const Progress: React.FC = () => {
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'quarter'>('week');
+  const [moodData, setMoodData] = useState<any>(null);
+  const [journalEntries, setJournalEntries] = useState<any[]>([]);
+  const [realStats, setRealStats] = useState<any>(null);
 
-  // Mock data for mood tracking
-  const moodData = {
-    week: {
-      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      datasets: [
-        {
+  useEffect(() => {
+    // Load real data from localStorage
+    const loadRealData = () => {
+      // Load mood data from AI chat
+      const storedMoods = JSON.parse(localStorage.getItem('youthwell_mood_data') || '[]');
+      
+      // Load journal entries
+      const storedJournals = JSON.parse(localStorage.getItem('youthwell_journal_entries') || '[]');
+      setJournalEntries(storedJournals);
+
+      // Process mood data for charts
+      const processedMoodData = processMoodData(storedMoods);
+      setMoodData(processedMoodData);
+
+      // Calculate real statistics
+      const stats = calculateRealStats(storedMoods, storedJournals);
+      setRealStats(stats);
+    };
+
+    loadRealData();
+  }, [timeRange]);
+
+  const processMoodData = (moods: any[]) => {
+    if (moods.length === 0) {
+      return getMockMoodData(); // Fallback to mock data if no real data
+    }
+
+    const now = new Date();
+    const getDateRange = () => {
+      switch (timeRange) {
+        case 'week':
+          return 7;
+        case 'month':
+          return 30;
+        case 'quarter':
+          return 90;
+        default:
+          return 7;
+      }
+    };
+
+    const days = getDateRange();
+    const startDate = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
+    
+    const filteredMoods = moods.filter(mood => 
+      new Date(mood.timestamp) >= startDate
+    );
+
+    const moodToScore = {
+      'happy': 5,
+      'neutral': 3,
+      'sad': 2,
+      'anxious': 2,
+      'angry': 1
+    };
+
+    if (timeRange === 'week') {
+      const weekData = Array(7).fill(0).map((_, i) => {
+        const date = new Date(startDate.getTime() + (i * 24 * 60 * 60 * 1000));
+        const dayMoods = filteredMoods.filter(mood => 
+          new Date(mood.timestamp).toDateString() === date.toDateString()
+        );
+        
+        if (dayMoods.length === 0) return 3; // Default neutral
+        const avgScore = dayMoods.reduce((sum, mood) => 
+          sum + (moodToScore[mood.mood as keyof typeof moodToScore] || 3), 0) / dayMoods.length;
+        return Math.round(avgScore);
+      });
+
+      return {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
           label: 'Mood Score',
-          data: [3, 4, 2, 4, 5, 4, 3],
+          data: weekData,
           borderColor: 'rgb(79, 70, 229)',
           backgroundColor: 'rgba(79, 70, 229, 0.1)',
           tension: 0.4,
           fill: true,
-        },
-      ],
-    },
-    month: {
-      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-      datasets: [
-        {
-          label: 'Average Mood Score',
-          data: [3.5, 3.8, 3.2, 4.1],
-          borderColor: 'rgb(79, 70, 229)',
-          backgroundColor: 'rgba(79, 70, 229, 0.1)',
-          tension: 0.4,
-          fill: true,
-        },
-      ],
-    },
-    quarter: {
-      labels: ['Month 1', 'Month 2', 'Month 3'],
-      datasets: [
-        {
-          label: 'Average Mood Score',
-          data: [3.2, 3.6, 3.9],
-          borderColor: 'rgb(79, 70, 229)',
-          backgroundColor: 'rgba(79, 70, 229, 0.1)',
-          tension: 0.4,
-          fill: true,
-        },
-      ],
-    },
+        }]
+      };
+    }
+    
+    // For month and quarter, group by weeks
+    return getMockMoodData(); // Simplified for now
+  };
+
+  const calculateRealStats = (moods: any[], journals: any[]) => {
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+    
+    const recentMoods = moods.filter(mood => new Date(mood.timestamp) >= weekAgo);
+    const recentJournals = journals.filter(journal => new Date(journal.date) >= weekAgo);
+    
+    const avgMood = recentMoods.length > 0 
+      ? recentMoods.reduce((sum, mood) => {
+          const scores = { 'happy': 5, 'neutral': 3, 'sad': 2, 'anxious': 2, 'angry': 1 };
+          return sum + (scores[mood.mood as keyof typeof scores] || 3);
+        }, 0) / recentMoods.length
+      : 3.5;
+
+    // Count unique active days (days with either mood tracking or journaling)
+    const activeDays = new Set([
+      ...recentMoods.map(mood => new Date(mood.timestamp).toDateString()),
+      ...recentJournals.map(journal => new Date(journal.date).toDateString())
+    ]).size;
+
+    return {
+      activeDays,
+      avgMood: avgMood.toFixed(1),
+      journalEntries: recentJournals.length,
+      moodCheckins: recentMoods.length
+    };
+  };
+
+  const getMockMoodData = () => {
+    // Fallback mock data
+    return {
+      week: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [
+          {
+            label: 'Mood Score',
+            data: [3, 4, 2, 4, 5, 4, 3],
+            borderColor: 'rgb(79, 70, 229)',
+            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+            tension: 0.4,
+            fill: true,
+          },
+        ],
+      },
+      month: {
+        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+        datasets: [
+          {
+            label: 'Average Mood Score',
+            data: [3.5, 3.8, 3.2, 4.1],
+            borderColor: 'rgb(79, 70, 229)',
+            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+            tension: 0.4,
+            fill: true,
+          },
+        ],
+      },
+      quarter: {
+        labels: ['Month 1', 'Month 2', 'Month 3'],
+        datasets: [
+          {
+            label: 'Average Mood Score',
+            data: [3.2, 3.6, 3.9],
+            borderColor: 'rgb(79, 70, 229)',
+            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+            tension: 0.4,
+            fill: true,
+          },
+        ],
+      },
+    };
   };
 
   const chartOptions = {
@@ -172,29 +293,54 @@ const Progress: React.FC = () => {
     },
   ];
 
-  const stats = [
+  const stats = realStats ? [
     {
       label: 'Days Active',
-      value: '12',
-      change: '+3 this week',
+      value: realStats.activeDays.toString(),
+      change: 'this week',
       color: 'text-green-600 dark:text-green-400'
     },
     {
       label: 'Avg. Mood',
-      value: '3.8/5',
-      change: '+0.3 from last week',
+      value: `${realStats.avgMood}/5`,
+      change: 'this week',
       color: 'text-blue-600 dark:text-blue-400'
     },
     {
-      label: 'Meditations',
-      value: '15',
-      change: '+5 this week',
+      label: 'Mood Check-ins',
+      value: realStats.moodCheckins.toString(),
+      change: 'this week',
       color: 'text-purple-600 dark:text-purple-400'
     },
     {
       label: 'Journal Entries',
-      value: '8',
-      change: '+2 this week',
+      value: realStats.journalEntries.toString(),
+      change: 'this week',
+      color: 'text-orange-600 dark:text-orange-400'
+    },
+  ] : [
+    {
+      label: 'Days Active',
+      value: '0',
+      change: 'Start using the app!',
+      color: 'text-green-600 dark:text-green-400'
+    },
+    {
+      label: 'Avg. Mood',
+      value: '-',
+      change: 'Track your mood in Chat',
+      color: 'text-blue-600 dark:text-blue-400'
+    },
+    {
+      label: 'Mood Check-ins',
+      value: '0',
+      change: 'Use AI Chat to track',
+      color: 'text-purple-600 dark:text-purple-400'
+    },
+    {
+      label: 'Journal Entries',
+      value: '0',
+      change: 'Start journaling',
       color: 'text-orange-600 dark:text-orange-400'
     },
   ];
@@ -257,13 +403,15 @@ const Progress: React.FC = () => {
         </div>
 
         <div className="h-64">
-          <Line data={moodData[timeRange]} options={chartOptions} />
+          <Line data={moodData || getMockMoodData()[timeRange]} options={chartOptions} />
         </div>
 
         <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
           <p className="text-sm text-blue-800 dark:text-blue-200">
-            <strong>Insight:</strong> Your mood has been trending upward over the past week! 
-            Keep up the great work with your wellness practices.
+            <strong>Insight:</strong> {realStats && realStats.moodCheckins > 0 
+              ? `You've checked in ${realStats.moodCheckins} times this week! Keep tracking your mood to see patterns and progress.`
+              : 'Start using the AI Chat to track your mood and see your progress here. Regular check-ins help identify patterns!'
+            }
           </p>
         </div>
       </div>

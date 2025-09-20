@@ -155,7 +155,7 @@ const Home: React.FC = () => {
         </div>
       </footer>
 
-      <style jsx>{`
+      <style>{`
         .waves {
           position: relative;
           width: 100%;

@@ -60,3 +60,108 @@
 .breathing-animation {
   animation: breathe 4s ease-in-out infinite;
 }
+
+/* Mobile responsiveness enhancements */
+@media (max-width: 640px) {
+  .card {
+    @apply p-4 rounded-lg;
+  }
+  
+  .text-4xl {
+    @apply text-3xl;
+  }
+  
+  .text-6xl {
+    @apply text-4xl;
+  }
+  
+  .px-8 {
+    @apply px-6;
+  }
+  
+  .py-4 {
+    @apply py-3;
+  }
+  
+  /* Make chat input area more mobile-friendly */
+  .chat-container {
+    @apply h-[calc(100vh-12rem)];
+  }
+}
+
+/* Audio player enhancements */
+.audio-player {
+  @apply w-full;
+}
+
+.audio-player .slider {
+  @apply appearance-none bg-gray-200 dark:bg-gray-700 rounded-lg h-1;
+}
+
+.audio-player .slider::-webkit-slider-thumb {
+  @apply appearance-none w-3 h-3 bg-indigo-600 rounded-full cursor-pointer;
+}
+
+.audio-player .slider::-moz-range-thumb {
+  @apply w-3 h-3 bg-indigo-600 rounded-full cursor-pointer border-0;
+}
+
+/* Better line clamping */
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* Dark mode slider improvements */
+@media (prefers-color-scheme: dark) {
+  .slider::-webkit-slider-thumb {
+    @apply bg-indigo-400;
+  }
+  
+  .slider::-moz-range-thumb {
+    @apply bg-indigo-400;
+  }
+}
+
+/* Mobile navigation improvements */
+.mobile-nav {
+  @apply fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 lg:hidden z-50;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.mobile-nav-item {
+  @apply flex flex-col items-center justify-center p-3 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200;
+}
+
+.mobile-nav-item.active {
+  @apply text-indigo-600 dark:text-indigo-400;
+}
+
+/* Better touch targets for mobile */
+@media (max-width: 768px) {
+  button {
+    @apply min-h-[44px];
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    @apply px-6 py-3 text-base;
+  }
+  
+  /* Audio controls */
+  .audio-player button {
+    @apply p-3;
+  }
+  
+  /* Meditation cards */
+  .meditation-card {
+    @apply p-4;
+  }
+  
+  /* Progress chart container */
+  .chart-container {
+    @apply h-48;
+  }
+}

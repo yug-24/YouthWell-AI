@@ -167,6 +167,212 @@ router.put('/sessions/:sessionId', authenticateToken, async (req: AuthenticatedR
   }
 });
 
+// Simple AI Chat endpoint for frontend (non-authenticated)
+router.post('/ai-chat', async (req: express.Request, res: express.Response) => {
+  try {
+    const { message, conversationHistory } = req.body;
+    
+    if (!message || typeof message !== 'string') {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    // Use Gemini AI if available, otherwise fallback
+    if (process.env.GEMINI_API_KEY) {
+      const aiResponse = await generateGeminiResponse(message, conversationHistory);
+      return res.json(aiResponse);
+    }
+
+    // Fallback to simple responses
+    const fallbackResponse = generateAIResponse(message);
+    const moodAnalysis = {
+      mood: detectSimpleMood(message),
+      confidence: 0.7,
+      suggestions: ['Take a moment to breathe', 'Consider talking to someone you trust'],
+      supportiveMessage: 'Thank you for sharing your thoughts with me.'
+    };
+
+    res.json({
+      message: fallbackResponse,
+      mood: moodAnalysis
+    });
+
+  } catch (error) {
+    console.error('AI Chat error:', error);
+    res.status(500).json({
+      error: 'AI service error',
+      message: "I'm here to listen and support you. Sometimes I might have trouble responding, but please know that your feelings matter and you're not alone."
+    });
+  }
+});
+
+// Journal insights endpoint (non-authenticated)  
+router.post('/journal-insights', async (req: express.Request, res: express.Response) => {
+  try {
+    const { entries } = req.body;
+    
+    if (!entries || !Array.isArray(entries)) {
+      return res.status(400).json({ error: 'Entries array is required' });
+    }
+
+    let insight = "You're doing great by taking time to reflect on your feelings. Keep writing - it's a powerful tool for understanding yourself better.";
+
+    if (process.env.GEMINI_API_KEY) {
+      try {
+        const { GoogleGenerativeAI } = await import('@google/generative-ai');
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        
+        const recentEntries = entries.slice(-7);
+        const entriesText = recentEntries.map((entry: any) => 
+          `Date: ${entry.date}, Mood: ${entry.mood}, Content: ${entry.content.substring(0, 200)}...`
+        ).join('\n');
+
+        const prompt = `
+          Based on these recent journal entries from a teenager, provide a supportive insight about their emotional journey.
+          
+          Entries:
+          ${entriesText}
+          
+          Provide a brief, encouraging insight (2-3 sentences) that:
+          - Acknowledges their emotional patterns
+          - Highlights any positive trends or strengths
+          - Offers gentle encouragement
+          - Remains supportive and non-clinical
+        `;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        insight = response.text();
+      } catch (geminiError) {
+        console.error('Gemini insight generation error:', geminiError);
+        // Fall back to default insight
+      }
+    }
+
+    res.json({ insight });
+
+  } catch (error) {
+    console.error('Journal insights error:', error);
+    res.json({
+      insight: "You're doing great by taking time to reflect on your feelings. Keep writing - it's a powerful tool for understanding yourself better."
+    });
+  }
+});
+
+// Generate Gemini response
+async function generateGeminiResponse(message: string, conversationHistory?: string[]) {
+  try {
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    
+    // Generate AI response
+    const context = conversationHistory ? conversationHistory.slice(-6).join('\n') : '';
+    const prompt = `
+      You are a supportive AI companion for teenagers (13-18 years old) focused on mental wellness. 
+      You are empathetic, non-judgmental, and provide emotional support.
+      
+      IMPORTANT GUIDELINES:
+      - You are NOT a therapist or medical professional
+      - Always remind users in crisis to contact emergency services or a trusted adult
+      - Be warm, understanding, and age-appropriate
+      - Validate their feelings without minimizing them
+      - Offer gentle coping strategies when appropriate
+      - Keep responses conversational and supportive (2-3 sentences)
+      
+      Previous conversation context:
+      ${context}
+      
+      User's current message: "${message}"
+      
+      Respond with empathy and support. If they express severe distress, gently encourage them to reach out for professional help.
+    `;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const aiMessage = response.text();
+
+    // Analyze mood
+    const moodAnalysis = await analyzeGeminiMood(message, model);
+
+    return {
+      message: aiMessage,
+      mood: moodAnalysis
+    };
+
+  } catch (error) {
+    console.error('Gemini response error:', error);
+    throw error;
+  }
+}
+
+// Analyze mood with Gemini
+async function analyzeGeminiMood(text: string, model: any) {
+  try {
+    const prompt = `
+      Analyze the emotional content of this text and provide a mood assessment for a teenager (13-18 years old).
+      
+      Text: "${text}"
+      
+      Please respond with a JSON object containing:
+      {
+        "mood": "happy" | "neutral" | "sad" | "anxious" | "angry",
+        "confidence": number between 0-1,
+        "suggestions": array of 2-3 helpful suggestions,
+        "supportiveMessage": a warm, empathetic message for the user
+      }
+      
+      Be supportive, understanding, and age-appropriate. Focus on validation and gentle guidance.
+    `;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text_response = response.text();
+    
+    // Clean the response to extract JSON
+    const jsonMatch = text_response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+    
+    // Fallback if JSON parsing fails
+    return {
+      mood: 'neutral',
+      confidence: 0.5,
+      suggestions: ['Take a moment to breathe', 'Consider talking to someone you trust'],
+      supportiveMessage: 'Thank you for sharing your thoughts. Your feelings are valid.'
+    };
+  } catch (error) {
+    console.error('Mood analysis error:', error);
+    return {
+      mood: 'neutral',
+      confidence: 0,
+      suggestions: ['Take care of yourself', 'Remember that you matter'],
+      supportiveMessage: 'I appreciate you sharing with me. You\'re not alone in this.'
+    };
+  }
+}
+
+// Simple mood detection fallback
+function detectSimpleMood(text: string): 'happy' | 'neutral' | 'sad' | 'anxious' | 'angry' {
+  const lowerText = text.toLowerCase();
+  
+  if (lowerText.includes('anxious') || lowerText.includes('worry') || lowerText.includes('nervous')) {
+    return 'anxious';
+  }
+  if (lowerText.includes('sad') || lowerText.includes('depressed') || lowerText.includes('upset')) {
+    return 'sad';
+  }
+  if (lowerText.includes('angry') || lowerText.includes('mad') || lowerText.includes('frustrated')) {
+    return 'angry';
+  }
+  if (lowerText.includes('happy') || lowerText.includes('good') || lowerText.includes('great')) {
+    return 'happy';
+  }
+  
+  return 'neutral';
+}
+
 // Placeholder AI response generator
 function generateAIResponse(userInput: string): string {
   // This is a placeholder. In production, integrate with OpenAI, Claude, or other AI services

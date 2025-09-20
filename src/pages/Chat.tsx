@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, AlertTriangle, Heart } from 'lucide-react';
+import { Send, Bot, User, AlertTriangle, Heart, Sparkles } from 'lucide-react';
+import geminiService, { type MoodAnalysis } from '../services/geminiService';
 
 interface Message {
   id: string;
@@ -7,6 +8,7 @@ interface Message {
   sender: 'user' | 'ai';
   timestamp: Date;
   emotion?: string;
+  moodAnalysis?: MoodAnalysis;
 }
 
 const Chat: React.FC = () => {
@@ -20,6 +22,7 @@ const Chat: React.FC = () => {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [conversationHistory, setConversationHistory] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -86,22 +89,52 @@ const Chat: React.FC = () => {
       emotion
     };
 
+    const currentInput = inputValue;
     setMessages(prev => [...prev, userMessage]);
+    setConversationHistory(prev => [...prev, `User: ${currentInput}`]);
     setInputValue('');
     setIsTyping(true);
 
-    // Simulate AI typing delay
-    setTimeout(() => {
+    try {
+      // Get AI response using Gemini
+      const response = await geminiService.generateChatResponse(currentInput, conversationHistory);
+      
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
-        content: generateAIResponse(inputValue, emotion),
+        content: response.message,
         sender: 'ai',
         timestamp: new Date(),
+        moodAnalysis: response.mood
       };
 
       setMessages(prev => [...prev, aiResponse]);
+      setConversationHistory(prev => [...prev, `AI: ${response.message}`]);
+      
+      // Save mood data to localStorage for progress tracking
+      if (response.mood) {
+        const moodData = {
+          date: new Date().toISOString().split('T')[0],
+          mood: response.mood.mood,
+          confidence: response.mood.confidence,
+          timestamp: new Date().toISOString()
+        };
+        
+        const existingMoods = JSON.parse(localStorage.getItem('youthwell_mood_data') || '[]');
+        existingMoods.push(moodData);
+        localStorage.setItem('youthwell_mood_data', JSON.stringify(existingMoods));
+      }
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      const fallbackResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        content: generateAIResponse(currentInput, emotion),
+        sender: 'ai',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, fallbackResponse]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -164,6 +197,32 @@ const Chat: React.FC = () => {
                 }`}
               >
                 <p className="text-sm leading-relaxed">{message.content}</p>
+                
+                {/* Mood Analysis Display */}
+                {message.moodAnalysis && message.sender === 'ai' && (
+                  <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      <span className="text-xs font-medium text-blue-800 dark:text-blue-200">
+                        Mood Detected: {message.moodAnalysis.mood} ({Math.round(message.moodAnalysis.confidence * 100)}% confidence)
+                      </span>
+                    </div>
+                    {message.moodAnalysis.suggestions.length > 0 && (
+                      <div className="text-xs text-blue-700 dark:text-blue-300">
+                        <strong>Suggestions:</strong>
+                        <ul className="mt-1 space-y-1">
+                          {message.moodAnalysis.suggestions.map((suggestion, idx) => (
+                            <li key={idx} className="flex items-start gap-1">
+                              <span>•</span>
+                              <span>{suggestion}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
                 <p className={`text-xs mt-2 ${
                   message.sender === 'user' 
                     ? 'text-indigo-200' 

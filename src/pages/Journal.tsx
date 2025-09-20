@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Save, Plus, Edit3, Smile, Meh, Frown } from 'lucide-react';
+import { Calendar, Save, Plus, Edit3, Smile, Meh, Frown, Sparkles } from 'lucide-react';
+import geminiService from '../services/geminiService';
 
 interface JournalEntry {
   id: string;
@@ -15,6 +16,8 @@ const Journal: React.FC = () => {
   const [currentMood, setCurrentMood] = useState<'happy' | 'neutral' | 'sad'>('neutral');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [isEditing, setIsEditing] = useState(false);
+  const [aiInsight, setAiInsight] = useState<string>('');
+  const [isGeneratingInsight, setIsGeneratingInsight] = useState(false);
 
   const dailyPrompts = [
     "What made you smile today?",
@@ -59,7 +62,7 @@ const Journal: React.FC = () => {
     }
   }, [selectedDate, entries]);
 
-  const saveEntry = () => {
+  const saveEntry = async () => {
     const entryData: JournalEntry = {
       id: selectedDate,
       date: selectedDate,
@@ -75,7 +78,25 @@ const Journal: React.FC = () => {
     setEntries(updatedEntries);
     localStorage.setItem('youthwell_journal_entries', JSON.stringify(updatedEntries));
     
+    // Generate AI insight if we have enough entries
+    if (updatedEntries.length >= 3) {
+      generateInsight(updatedEntries);
+    }
+    
     alert('Entry saved successfully!');
+  };
+
+  const generateInsight = async (journalEntries: JournalEntry[]) => {
+    setIsGeneratingInsight(true);
+    try {
+      const insight = await geminiService.generateJournalInsights(journalEntries);
+      setAiInsight(insight);
+    } catch (error) {
+      console.error('Error generating insight:', error);
+      setAiInsight('Keep up the great work with your journaling! Reflection is a powerful tool for growth.');
+    } finally {
+      setIsGeneratingInsight(false);
+    }
   };
 
   const getMoodIcon = (mood: 'happy' | 'neutral' | 'sad') => {
@@ -177,12 +198,49 @@ const Journal: React.FC = () => {
         </div>
       </div>
 
+      {/* AI Insights */}
+      {(aiInsight || isGeneratingInsight) && (
+        <div className="card bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-purple-200 dark:border-purple-700">
+          <div className="flex items-start">
+            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+              <Sparkles className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-purple-900 dark:text-purple-100 mb-2">
+                AI Insight from Your Journal
+              </h3>
+              {isGeneratingInsight ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-sm text-purple-700 dark:text-purple-300">Analyzing your recent entries...</span>
+                </div>
+              ) : (
+                <p className="text-sm text-purple-800 dark:text-purple-200 leading-relaxed">
+                  {aiInsight}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Recent Entries */}
       {entries.length > 0 && (
         <div className="card">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
-            Recent Entries
-          </h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              Recent Entries
+            </h2>
+            {entries.length >= 3 && !aiInsight && !isGeneratingInsight && (
+              <button
+                onClick={() => generateInsight(entries)}
+                className="btn-secondary text-sm flex items-center space-x-2"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span>Get AI Insight</span>
+              </button>
+            )}
+          </div>
           
           <div className="space-y-4">
             {entries.slice(0, 5).map((entry) => (
